@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+* {
+  box-sizing: border-box;
+  font-family: 'Roboto Mono', monospace;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  background-color: #140d0a;
+}
