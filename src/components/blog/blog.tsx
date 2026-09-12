@@ -15,7 +15,7 @@ export function Blog() {
         propriedade digital.
       </p>
 
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4">
         <CardBlog
           date="12 de setembro"
           duration="Leitura de 6 min"

@@ -1,4 +1,4 @@
-import { CardNft } from './card-nft'
+import { CardNft } from '../card-nft'
 import Image1 from '#/assets/hero-image.png'
 import Image2 from '#/assets/card-feature.png'
 import Image3 from '#/assets/image-3.png'

@@ -1,6 +1,6 @@
 export function CollectorProfileForm() {
   return (
-    <div className="w-full max-w-[763px]">
+    <div className="w-full max-w-190.75">
       <h1 className="text-base leading-4 font-bold text-[#F5F1EB] mb-3">
         Perfil do colecionador
       </h1>
@@ -63,7 +63,7 @@ export function CollectorProfileForm() {
                     pl-3
                     pr-10
                     text-sm
-                    leading-[15px]
+                    leading-3.75
                     font-normal
                     text-[#B39463]
                     outline-none
@@ -185,7 +185,7 @@ export function CollectorProfileForm() {
                       pl-3
                       pr-10
                       text-sm
-                      leading-[15px]
+                      leading-3.75
                       font-normal
                       text-[#B39463]
                       outline-none
@@ -278,7 +278,7 @@ export function CollectorProfileForm() {
               Nome ENS
               <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
             </label>
-            <div className="relative w-full max-w-[78px]">
+            <div className="relative w-full max-w-19.5">
               <select
                 id="network"
                 name="network"
@@ -294,7 +294,7 @@ export function CollectorProfileForm() {
                       pl-2.5
                       pr-7
                       text-sm
-                      leading-[15px]
+                      leading-3.75
                       font-normal
                       text-[#F5F1EB]
                       outline-none
@@ -382,7 +382,7 @@ export function CollectorProfileForm() {
           <textarea
             name=""
             id=""
-            className="rounded-[3px] w-full max-w-[369.5px] h-[152px] border resize-none border-[#3F2319]"
+            className="rounded-[3px] w-full max-w-[369.5px] h-38 border resize-none border-[#3F2319]"
           ></textarea>
         </div>
       </form>

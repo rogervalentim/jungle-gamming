@@ -6,7 +6,7 @@ import LinkedinWhite from '#/assets/icons/linkedin-white.svg'
 import Message from '#/assets/icons/message.svg'
 import TwitterWhite from '#/assets/icons/twitter-white.svg'
 
-import { Button } from '@base-ui/react/button'
+import { Button } from '../ui/button'
 
 export function NftData() {
   return (

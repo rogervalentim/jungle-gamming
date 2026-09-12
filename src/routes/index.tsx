@@ -1,11 +1,11 @@
 import { Blog } from '#/components/blog/blog'
-import { CardFeature } from '#/components/card-feature'
 import { Collection } from '#/components/collection'
-import { FilterSidebar } from '#/components/filter-sidebar'
 import { Footer } from '#/components/footer'
-import { Hero } from '#/components/hero'
+import { CardFeature } from '#/components/home/card-feature'
+import { FilterSidebar } from '#/components/home/filter-sidebar'
+import { Hero } from '#/components/home/hero'
 import { Navbar } from '#/components/navbar'
-import { NftCategory } from '#/components/nft-category'
+import { NftCategory } from '#/components/nft/nft-category'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({ component: Home })

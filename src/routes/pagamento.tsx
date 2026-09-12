@@ -4,6 +4,7 @@ import { Navbar } from '#/components/navbar'
 import { createFileRoute } from '@tanstack/react-router'
 import { CollectorProfileForm } from '#/components/payment/collector-profile-form'
 import { NftOrderSummary } from '#/components/payment/nft-order-summary'
+import { OrderConfirmation } from '#/components/payment/order-confirmation'
 
 export const Route = createFileRoute('/pagamento')({
   component: RouteComponent,

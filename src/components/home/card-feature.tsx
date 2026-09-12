@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from './ui/card'
+} from '../ui/card'
 import ImageFeature from '#/assets/card-feature.png'
 
 export function CardFeature() {

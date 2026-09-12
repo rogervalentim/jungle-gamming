@@ -8,7 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { BreadcrumbComponent } from '#/components/breadcrumb'
 import { MoreCollection } from '#/components/more-collection'
 
-export const Route = createFileRoute('/nft-details')({
+export const Route = createFileRoute('/mercado')({
   component: NftDetails,
 })
 
@@ -26,7 +26,7 @@ function NftDetails() {
               },
               {
                 label: 'Mercado',
-                href: '/market',
+                href: '/mercado',
               },
               {
                 label: 'Detalhes do NFT',

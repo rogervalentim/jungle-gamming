@@ -1,5 +1,5 @@
-import { Button } from './ui/button'
-import { Slider } from './ui/slider'
+import { Button } from '../ui/button'
+// import { Slider } from '../ui/slider'
 
 export function FilterSidebar() {
   return (

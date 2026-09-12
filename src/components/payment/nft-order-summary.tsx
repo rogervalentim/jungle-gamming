@@ -17,7 +17,7 @@ export function NftOrderSummary() {
         </h4>
       </div>
 
-      <Card className="p-0 ring-0 bg-[#241612] w-full max-w-[405px] mb-3">
+      <Card className="p-0 ring-0 bg-[#241612] w-full max-w-101.25 mb-3">
         <CardContent className=" p-0  pr-6 flex gap-5 w-full items-center flex-row">
           <div className="flex gap-2 items-center">
             <img
@@ -40,7 +40,7 @@ export function NftOrderSummary() {
             </span>
           </div>
 
-          <div className="flex gap-[58px] items-center">
+          <div className="flex gap-14.5 items-center">
             <span className="text-base leading-4  w-full font-bold text-[#E89B55]">
               2.38 ETH
             </span>
@@ -54,7 +54,7 @@ export function NftOrderSummary() {
         </p>
 
         <ul>
-          <li className="flex justify-between items-center mb-[14px]">
+          <li className="flex justify-between items-center mb-3.5">
             <span className="text-base font-normal text-[#F5F1EB]">
               Subtotal
             </span>
@@ -62,7 +62,7 @@ export function NftOrderSummary() {
               26.83 ETH
             </span>
           </li>
-          <li className="flex justify-between items-center mb-[14px]">
+          <li className="flex justify-between items-center mb-3.5">
             <span className="text-base font-normal text-[#F5F1EB]">
               Desconto do lançamento
             </span>
@@ -70,7 +70,7 @@ export function NftOrderSummary() {
               (-) 00.00
             </span>
           </li>
-          <li className="flex justify-between items-center mb-[14px]">
+          <li className="flex justify-between items-center mb-3.5">
             <span className="text-base font-normal text-[#F5F1EB]">
               Taxa de rede
             </span>
@@ -87,7 +87,7 @@ export function NftOrderSummary() {
         </div>
 
         <ul className="mb-3">
-          <li className="flex justify-between px-[42px]">
+          <li className="flex justify-between px-10.5">
             <span className="text-base leading-4 font-bold text-[#F5F1EB]">
               Total
             </span>
@@ -102,7 +102,7 @@ export function NftOrderSummary() {
         </h3>
 
         <ul className="mb-6">
-          <li className="w-full h-[45px] pl-3 border border-[#3F2319] rounded-[3px] flex gap-2.5 items-center mb-4 has-checked:border-[#D28A4C]">
+          <li className="w-full h-11.25 pl-3 border border-[#3F2319] rounded-[3px] flex gap-2.5 items-center mb-4 has-checked:border-[#D28A4C]">
             <input
               type="radio"
               name="wallet"
@@ -124,7 +124,7 @@ export function NftOrderSummary() {
             <Wallet />
           </li>
 
-          <li className="w-full h-[45px] pl-3 border border-[#3F2319] rounded-[3px] flex gap-2.5 items-center mb-4 has-checked:border-[#D28A4C]">
+          <li className="w-full h-11.25 pl-3 border border-[#3F2319] rounded-[3px] flex gap-2.5 items-center mb-4 has-checked:border-[#D28A4C]">
             <input
               type="radio"
               name="wallet"
@@ -146,7 +146,7 @@ export function NftOrderSummary() {
             <span className="text-base leading-4 text-[#F5F1EB]">MetaMask</span>
           </li>
 
-          <li className="w-full h-[45px] pl-3 border border-[#3F2319] rounded-[3px] flex gap-2.5 items-center has-checked:border-[#D28A4C]">
+          <li className="w-full h-11.25 pl-3 border border-[#3F2319] rounded-[3px] flex gap-2.5 items-center has-checked:border-[#D28A4C]">
             <input
               type="radio"
               name="wallet"
@@ -171,7 +171,7 @@ export function NftOrderSummary() {
           </li>
         </ul>
 
-        <Button className="w-full max-w-[405px] bg-[#D28A4C] h-[45px] rounded-[8px] flex items-center justify-center text-base font-bold leading-4 text-[#140D0A]">
+        <Button className="w-full max-w-101.25 bg-[#D28A4C] h-11.25 rounded-[8px] flex items-center justify-center text-base font-bold leading-4 text-[#140D0A]">
           Confirmar compra
         </Button>
       </div>
