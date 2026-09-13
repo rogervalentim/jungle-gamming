@@ -1,4 +1,4 @@
-import HeroImage from '#/assets/hero-image.png'
+import HeroImage from '#/assets/hero-image.webp'
 import { Button } from '../ui/button'
 
 export function Hero() {
@@ -34,7 +34,7 @@ export function Hero() {
           EXPLORAR <span aria-hidden="true">→</span>
         </a>
 
-        <Button className="mb-11 hidden h-10 w-full max-w-35 items-center justify-center rounded-md bg-[#D28A4C] text-base font-bold text-[#140D0A] lg:flex">
+        <Button onClick={() => document.getElementById('explorar')?.scrollIntoView({ behavior: 'smooth' })} className="mb-11 hidden h-10 w-full max-w-35 items-center justify-center rounded-md bg-[#D28A4C] text-base font-bold text-[#140D0A] lg:flex">
           Explorar
         </Button>
 
@@ -51,6 +51,9 @@ export function Hero() {
       <img
         src={HeroImage}
         alt="Arte digital em destaque"
+        width="450"
+        height="450"
+        fetchPriority="high"
         className="absolute right-4 top-4 h-34 w-34 rounded-2xl object-cover md:right-6 md:top-6 md:h-56 md:w-56 lg:static lg:h-112.5 lg:w-112.5 lg:rounded-3xl"
       />
 

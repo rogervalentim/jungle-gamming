@@ -1,52 +1,64 @@
-import Image1 from '#/assets/card-feature.png'
-import Image3 from '#/assets/image-3.png'
-import Image4 from '#/assets/image-4.png'
+import { useQuery } from '@tanstack/react-query'
+import { nftListOptions } from '#/api/nfts'
 import { CardNft } from './card-nft'
 
 interface MoreCollectionProps {
-    title: string
+  title: string
+  currentId?: string
+  genre?: string
 }
 
-export function MoreCollection({title}: MoreCollectionProps) {
-    return (
-          <section>
-          <div className="border-b-[0.3px] border-[#D28A4C] pb-3 mb-8">
-            <h4 className="text-[17px] leading-4 font-bold text-[#E89B55]">
-              {title}
-            </h4>
-          </div>
-          <div className="grid grid-cols-5 gap-6.5 mb-24">
+export function MoreCollection({
+  title,
+  currentId,
+  genre = 'all',
+}: MoreCollectionProps) {
+  const query = useQuery(
+    nftListOptions({
+      minPrice: '0',
+      maxPrice: '999999999999.999999999999999999',
+      category: 'all',
+      genre,
+      page: 1,
+      pageSize: 8,
+    }),
+  )
+  const items =
+    query.data?.items.filter((item) => item.id !== currentId).slice(0, 5) ?? []
+
+  return (
+    <section aria-label={title}>
+      <div className="border-b-[0.3px] border-[#D28A4C] pb-3 mb-8">
+        <h2 className="text-[17px] leading-4 font-bold text-[#E89B55]">
+          {title}
+        </h2>
+      </div>
+      {query.isPending && (
+        <p role="status" className="mb-24 text-[#CFB28C]">
+          Carregando sugestões…
+        </p>
+      )}
+      {query.isError && (
+        <p role="status" className="mb-24 text-[#CFB28C]">
+          Sugestões indisponíveis no momento.
+        </p>
+      )}
+      {query.isSuccess && (
+        <div className="grid grid-cols-5 gap-6.5 mb-24">
+          {items.map((item) => (
             <CardNft
-              name="Cosmic Bloom #118"
-              price={1.29}
-              currency="ETH"
-              image={Image1}
+              key={item.id}
+              id={item.id}
+              editionId={item.editionId}
+              name={item.name}
+              price={item.price}
+              currency={item.currency}
+              image={item.image}
+              cartAvailable={item.availableQuantity > 0}
             />
-            <CardNft
-              name="Violet Nomad #314"
-              price={1.39}
-              currency="ETH"
-              image={Image1}
-            />
-            <CardNft
-              name="Ivory Baron #088"
-              price={1.79}
-              currency="ETH"
-              image={Image3}
-            />
-            <CardNft
-              name="Golden Beat #207"
-              price={0.99}
-              currency="ETH"
-              image={Image4}
-            />
-            <CardNft
-              name="Golden Signal #160"
-              price={0.39}
-              currency="ETH"
-              image={Image4}
-            />
-          </div>
-        </section>
-    )
+          ))}
+        </div>
+      )}
+    </section>
+  )
 }

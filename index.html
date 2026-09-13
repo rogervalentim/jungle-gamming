@@ -1,19 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR" class="min-h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>jungle-gamming</title>
-    <!-- Roboto mono font  -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
-      rel="stylesheet"
-    />
+    <title>Kurio — Marketplace de NFTs</title>
+    <meta name="description" content="Descubra e colecione NFTs de arte digital no marketplace de demonstração Kurio." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="image" href="/src/assets/hero-image.webp" fetchpriority="high" />
   </head>
-  <body>
-    <div id="app"></div>
+  <body
+    class="min-h-screen bg-[#140d0a] font-['Roboto_Mono',monospace] [&_button:not(:disabled)]:cursor-pointer [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-[#e89b55] [&_button:focus-visible]:outline-offset-[3px] [&_a[href]:focus-visible]:outline-2 [&_a[href]:focus-visible]:outline-[#e89b55] [&_a[href]:focus-visible]:outline-offset-[3px]"
+  >
+    <div id="app" class="min-h-screen"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

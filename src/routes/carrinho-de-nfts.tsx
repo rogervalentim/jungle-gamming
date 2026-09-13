@@ -13,7 +13,7 @@ function CartNfts() {
   return (
     <>
       <Navbar />
-      <main className="m-auto w-full max-w-300">
+      <main className="m-auto w-full max-w-300 px-6 xl:px-0">
         <div className="pt-8 mb-3">
           <BreadcrumbComponent
             items={[

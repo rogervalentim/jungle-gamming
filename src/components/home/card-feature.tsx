@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../ui/card'
-import ImageFeature from '#/assets/card-feature.png'
+import ImageFeature from '#/assets/card-feature.webp'
 
 export function CardFeature() {
   return (
@@ -21,6 +21,7 @@ export function CardFeature() {
       <CardContent className="p-0">
         <img
           src={ImageFeature}
+          alt="NFT em destaque da coleção Kurio"
           width="310"
           height="368"
           className="rounded-[22px]"

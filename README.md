@@ -1,194 +1,66 @@
-Welcome to your new TanStack Start app!
+# Kurio — Marketplace de NFTs
 
-# Getting Started
+Aplicação React, TypeScript, Vite e Tailwind com catálogo, detalhe, conta, favoritos, carrinho e checkout demonstráveis. O layout e os assets originais foram mantidos. **As compras são simuladas:** a carteira é um cadastro local e nenhuma transação é assinada ou enviada a uma blockchain.
 
-To run this application:
+## Executar
 
-```bash
-npm install
-npm run dev
+Requer Node 24 ou superior.
+
+```sh
+npm ci
+npm run dev:mocks
 ```
 
-# Building For Production
+Abra `http://localhost:3000`. O modo demo inicia o MSW antes da interface e persiste os dados simulados no navegador. Para verificar o pacote otimizado:
 
-To build this application for production:
-
-```bash
-npm run build
+```sh
+npm run build:demo
+npm run preview
 ```
 
-## Styling
+`npm run dev` e `npm run build` também ativam a demonstração por padrão. `npm run build:api` gera um pacote sem mocks para integração futura com um backend que implemente `/api`.
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+## Usar a demonstração
 
-### Removing Tailwind CSS
+O catálogo tem 24 NFTs, oito por página. Busca, gênero, rede, faixa de preço, categoria, ordenação e página são refletidos na URL. Cada NFT possui edições e estoque próprios. Valores ETH usam strings decimais e são calculados em wei.
 
-If you prefer not to use Tailwind CSS:
+Cadastre uma conta pela interface ou use um dos perfis fictícios:
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
+| E-mail | Senha |
+| --- | --- |
+| `ana@kurio.test` | `KurioAna!2026` |
+| `bruno@kurio.test` | `KurioBruno!2026` |
 
-## Linting & Formatting
+É possível adicionar NFTs ao carrinho antes do login; os itens são incorporados à conta ao entrar. Cadastre uma carteira em **Carteiras**, escolha um provedor no pagamento e confirme o pedido simulado. O pedido usa cotação de cinco minutos, valida preço/estoque e aceita tentativas repetidas sem criar compras duplicadas. O cupom de demonstração é `KURIO10`. O recibo pode ser recuperado pela URL `pagamento?order=<id>`, inclusive após recarregar a página. Pagamentos pendentes são consultados até serem confirmados ou recusados; uma falha de rede pode ser recuperada pela mesma tentativa.
 
+Perfil, avatar, senha e carteiras ficam persistidos por conta no navegador. Trocar a senha encerra as sessões da conta. Favoritos exigem login. As telas de perfil e carteiras também estão acessíveis no celular.
 
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
+## Cenários e reset
 
-```bash
+No console do navegador, após iniciar o modo demo:
+
+```js
+await window.kurioMocks.configure({ scenario: 'slow', latencyMs: 1500 })
+await window.kurioMocks.configure({ scenario: 'error', latencyMs: 0 })
+await window.kurioMocks.configure({ scenario: 'success', latencyMs: null })
+await window.kurioMocks.updateNft('emerald-042', { price: '2.5', availableQuantity: 3 })
+await window.kurioMocks.reset()
+```
+
+Os cenários simulados são `success`, `empty`, `slow`, `error`, `declined`, `pending`, `timeout`, `offline`, `expired` e `variable`. `pending` conclui o pedido depois de cerca de dois segundos; `timeout` cria o pedido mas devolve falha de rede, permitindo recuperar a tentativa; `expired` invalida a sessão; `variable` varia preço/estoque. `reset()` restaura a base inicial e limpa os dados da Kurio. Eventos Socket.IO simulados atualizam NFT e pedido entre abas do mesmo navegador, com consulta REST na reconexão. Use apenas dados fictícios: o MSW e o armazenamento local são editáveis pelo usuário e não constituem um backend de produção.
+
+## Verificar
+
+```sh
+npm run typecheck
 npm run lint
-npm run format
-npm run check
+npm run build:demo
+npm run test:e2e
+npm run audit:lighthouse
 ```
 
+No Windows com Chrome instalado, use `$env:PLAYWRIGHT_CHANNEL='chrome'` antes de `npm run test:e2e`. Os testes iniciam o preview na porta 4173. O Lighthouse mede início e detalhe em perfis mobile e desktop, três vezes cada, e grava medianas e relatórios em `reports/lighthouse`. As imagens de referência do Playwright ficam em `tests/e2e/visual.spec.ts-snapshots`. Consulte [ARCHITECTURE.md](ARCHITECTURE.md) para os contratos e [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) para o histórico e as pendências de produção.
 
+## Publicação da demonstração
 
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+O comando `npm run build` gera `dist` com os mocks ativados. Para publicar pela Vercel, use o framework Vite, o comando de build padrão e a pasta `dist`; `vercel.json` preserva o acesso direto às rotas da aplicação. Após publicar, verifique o carregamento de `/`, `/mercado?item=emerald-042`, `/login` e `/carrinho-de-nfts`, inclusive após refresh. Uma URL pública só deve ser informada depois dessa verificação. O build demonstrativo não é adequado para pagamentos reais.

@@ -2,18 +2,82 @@ import { Footer } from '#/components/footer'
 import { Navbar } from '#/components/navbar'
 import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
 import { Button } from '#/components/ui/button'
-import { createFileRoute } from '@tanstack/react-router'
+import { KurioSelect } from '#/components/ui/kurio-select'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import Image from '#/assets/image.png'
+import { requireSession } from '#/lib/require-session'
+import { useRef, useState } from 'react'
+import type { FormEvent } from 'react'
+import { changePassword, saveProfile, useProfile, useWallets } from '#/api/account'
+import { authErrorMessage, logout } from '#/api/auth'
+import { queryClient } from '#/api/nfts'
+import { setAuthToken } from '#/lib/auth-token'
 
 export const Route = createFileRoute('/perfil-do-colecionador')({
+  beforeLoad: requireSession,
   component: PerfilDoColecionadorRouteComponent,
 })
 
 function PerfilDoColecionadorRouteComponent() {
+  const navigate = useNavigate()
+  const profile = useProfile()
+  const wallets = useWallets()
+  const avatarInput = useRef<HTMLInputElement>(null)
+  const [avatar, setAvatar] = useState<string | null | undefined>(undefined)
+  const [feedback, setFeedback] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function onSave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const fields = new FormData(event.currentTarget)
+    const currentPassword = String(fields.get('currentPassword') ?? '')
+    const newPassword = String(fields.get('newPassword') ?? '')
+    const confirmPassword = String(fields.get('confirmPassword') ?? '')
+    if ((currentPassword || newPassword || confirmPassword) &&
+      (!currentPassword || newPassword.length < 8 || newPassword !== confirmPassword)) {
+      setFeedback('Confira a senha atual e a confirmação da nova senha (mínimo de 8 caracteres).')
+      return
+    }
+    setSaving(true)
+    setFeedback('')
+    try {
+      await saveProfile({
+        name: String(fields.get('name') ?? '').trim(),
+        username: String(fields.get('username') ?? '').trim(),
+        bio: profile.data?.bio ?? '',
+        ens: String(fields.get('ens') ?? '').trim(),
+        avatar: avatar === undefined ? (profile.data?.avatar ?? null) : avatar,
+      })
+      if (newPassword) {
+        await changePassword(currentPassword, newPassword)
+        queryClient.clear()
+        setAuthToken(null)
+        await navigate({ to: '/login' })
+      } else {
+        setFeedback('Perfil salvo com sucesso.')
+      }
+    } catch (error) {
+      setFeedback(authErrorMessage(error))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function onAvatar(file?: File) {
+    if (!file) return
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 180_000) {
+      setFeedback('Use uma imagem PNG, JPG ou WebP de até 180 KB.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => setAvatar(typeof reader.result === 'string' ? reader.result : null)
+    reader.readAsDataURL(file)
+  }
+
   return (
     <>
       <Navbar />
-      <main className="m-auto w-full max-w-300 pt-8 flex gap-7 mb-24">
+      <main className="m-auto w-full max-w-300 pt-8 flex flex-col px-4 gap-7 mb-24 sm:flex-row">
         <aside className="max-w-77.5 w-full max-h-101.75 h-auto bg-[#241612] pt-4.5 ">
           <h3 className="text-[18px] font-bold leading-4 text-[#F5F1EB] mb-2.5 pl-3.25 ">
             Meu perfil
@@ -21,7 +85,7 @@ function PerfilDoColecionadorRouteComponent() {
 
           <ul className="border-[#D28A4C] border-b-[0.3px]">
             <li className="pl-3.25 h-11.25 border-l-[6px] border-[#D28A4C]">
-              <a className="flex gap-4 items-center text-base leading-11.25 font-normal text-[#E89B55]">
+              <a href="/carteiras" className="flex gap-4 items-center text-base leading-11.25 font-normal text-[#E89B55]">
                 <span>
                   <svg
                     width="12"
@@ -247,8 +311,9 @@ function PerfilDoColecionadorRouteComponent() {
           </ul>
 
           <div className="pl-4.75 h-11.25">
-            <a
-              href="#"
+            <button
+              type="button"
+              onClick={() => void logout().catch(() => null).then(() => navigate({ to: '/login' }))}
               className="flex gap-4 items-center text-base leading-11.25 font-normal text-[#E89B55]"
             >
               <span>
@@ -283,7 +348,7 @@ function PerfilDoColecionadorRouteComponent() {
                 </svg>
               </span>
               Sair
-            </a>
+            </button>
           </div>
         </aside>
 
@@ -292,11 +357,13 @@ function PerfilDoColecionadorRouteComponent() {
             Perfil do colecionador
           </h3>
 
-          <form className="w-full">
-            <div className="flex gap-6 w-full mb-3">
+          <form className="w-full" onSubmit={onSave} key={profile.data?.email}>
+            {profile.isPending && <p role="status" className="mb-4 text-[#F5F1EB]">Carregando perfil...</p>}
+            {profile.isError && <p role="alert" className="mb-4 text-[#F0805F]">{authErrorMessage(profile.error)}</p>}
+            <div className="flex flex-col gap-6 w-full mb-3 sm:flex-row">
               <div className="w-full max-w-104.25">
                 <label
-                  htmlFor=""
+                  htmlFor="profile-name"
                   className="text-base  font-normal text-[#F5F1EB] flex  items-center"
                 >
                   Nome de exibição
@@ -306,14 +373,17 @@ function PerfilDoColecionadorRouteComponent() {
                 </label>
                 <input
                   type="text"
-                  name=""
-                  id=""
+                  name="name"
+                  id="profile-name"
+                  defaultValue={profile.data?.name}
+                  minLength={2}
+                  required
                   className="w-full max-w-104.25 h-10 rounded-[3px] border border-[#3F2319]"
                 />
               </div>
               <div className="w-full max-w-104.25">
                 <label
-                  htmlFor=""
+                  htmlFor="profile-username"
                   className="text-base  font-normal text-[#F5F1EB] flex  items-center"
                 >
                   Nome de usuário
@@ -323,16 +393,18 @@ function PerfilDoColecionadorRouteComponent() {
                 </label>
                 <input
                   type="text"
-                  name=""
-                  id=""
+                  name="username"
+                  id="profile-username"
+                  defaultValue={profile.data?.username}
+                  maxLength={40}
                   className="w-full max-w-104.25 h-10 rounded-[3px] border border-[#3F2319]"
                 />
               </div>
             </div>
-            <div className="flex gap-6 w-full mb-3">
+            <div className="flex flex-col gap-6 w-full mb-3 sm:flex-row">
               <div className="w-full max-w-104.25">
                 <label
-                  htmlFor=""
+                  htmlFor="profile-email"
                   className="text-base  font-normal text-[#F5F1EB] flex  items-center"
                 >
                   Email
@@ -343,8 +415,9 @@ function PerfilDoColecionadorRouteComponent() {
                 <div className="w-full max-w-104.25">
                   <input
                     type="email"
-                    name=""
-                    id=""
+                    id="profile-email"
+                    value={profile.data?.email ?? ''}
+                    readOnly
                     className="w-full max-w-104.25 h-10 rounded-[3px] border border-[#3F2319]"
                   />
                 </div>
@@ -352,7 +425,7 @@ function PerfilDoColecionadorRouteComponent() {
 
               <div className="w-full max-w-104.25">
                 <label
-                  htmlFor=""
+                  htmlFor="profile-ens"
                   className="text-base  font-normal text-[#F5F1EB] flex  items-center"
                 >
                   Nome ENS
@@ -361,83 +434,25 @@ function PerfilDoColecionadorRouteComponent() {
                   </span>
                 </label>
                 <div className="flex w-full gap-2.5 ">
-                  <div className="relative w-full max-w-19.5">
-                    <select
-                      id="network"
+                  <div className="w-full max-w-19.5">
+                    <KurioSelect
                       name="network"
-                      defaultValue=""
-                      className="
-                      appearance-none
-                      w-full
-                      h-10
-                      rounded-[3px]
-                      border
-                      border-[#3F2319]
-                      bg-transparent
-                      pl-2.5
-                      pr-7
-                      text-sm
-                      leading-3.75
-                      font-normal
-                      text-[#F5F1EB]
-                      outline-none
-                      cursor-pointer
-                    "
-                    >
-                      <option
-                        value=""
-                        disabled
-                        className="bg-[#140D0A] text-[#F5F1EB]"
-                      >
-                        .eth
-                      </option>
-
-                      <option
-                        value="ethereum"
-                        className="bg-[#140D0A] text-[#F5F1EB]"
-                      >
-                        Ethereum
-                      </option>
-
-                      <option
-                        value="polygon"
-                        className="bg-[#140D0A] text-[#F5F1EB]"
-                      >
-                        Polygon
-                      </option>
-
-                      <option
-                        value="solana"
-                        className="bg-[#140D0A] text-[#F5F1EB]"
-                      >
-                        Solana
-                      </option>
-                    </select>
-
-                    <svg
-                      className="
-                  pointer-events-none
-                  absolute
-                  right-2.5
-                  top-1/2
-                  -translate-y-1/2
-                  w-3
-                  h-3
-                  text-[#F5F1EB]
-                "
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
+                      placeholder=".eth"
+                      options={[
+                        { value: 'ethereum', label: 'Ethereum' },
+                        { value: 'polygon', label: 'Polygon' },
+                        { value: 'solana', label: 'Solana' },
+                      ]}
+                      className="pl-2.5"
+                    />
                   </div>
                   <div className="relative w-full ">
                     <input
                       type="text"
-                      name=""
-                      id=""
+                      name="ens"
+                      id="profile-ens"
+                      defaultValue={profile.data?.ens}
+                      maxLength={80}
                       className="w-full max-w-104.25 h-10 rounded-[3px] border border-[#3F2319]"
                     />
                   </div>
@@ -446,10 +461,10 @@ function PerfilDoColecionadorRouteComponent() {
             </div>
 
             <div className="w-full mb-8">
-              <div className="flex gap-7 max-w-full">
+              <div className="flex flex-col gap-7 max-w-full sm:flex-row">
                 <div className="w-full max-w-104.25">
                   <label
-                    htmlFor=""
+                    htmlFor="profile-wallet"
                     className="text-base  font-normal text-[#F5F1EB] flex  items-center"
                   >
                     Apelido da carteira
@@ -460,31 +475,33 @@ function PerfilDoColecionadorRouteComponent() {
                   <div className="flex items-center gap-6">
                     <input
                       type="text"
-                      name=""
-                      id=""
+                      id="profile-wallet"
+                      value={wallets.data?.items.find((item) => item.primary)?.label ?? wallets.data?.items[0]?.label ?? ''}
+                      readOnly
                       className="w-full max-w-104.25 pl-[22.75px] h-10 rounded-[3px] border border-[#3F2319]"
                     />
                   </div>
                 </div>
                 <div>
                   <label
-                    htmlFor=""
+                    htmlFor="profile-avatar"
                     className="text-base  font-normal text-[#F5F1EB] flex  items-center mb-1"
                   >
                     Avatar
                   </label>
                   <div className="flex gap-6">
                     <Avatar className="bg-[#2F1D15] border border-[#3F2319] flex justify-center items-center w-11 h-11">
-                      <AvatarImage src={Image} className="w-[16.65px] h-auto" />
+                      <AvatarImage src={avatar === undefined ? (profile.data?.avatar ?? Image) : (avatar ?? Image)} className="w-[16.65px] h-auto" />
                       <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
 
                     <div className="flex">
-                      <Button className="bg-[#D28A4C] max-w-24.5 w-full h-10 rounded-[3px] text-sm font-bold leading-4 text-[#140D0A]">
+                      <input ref={avatarInput} id="profile-avatar" type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(event) => onAvatar(event.target.files?.[0])} />
+                      <Button type="button" onClick={() => avatarInput.current?.click()} className="bg-[#D28A4C] max-w-24.5 w-full h-10 rounded-[3px] text-sm font-bold leading-4 text-[#140D0A]">
                         Alterar
                       </Button>
 
-                      <Button className="bg-transparent  max-w-24.5 w-full h-10 rounded-[3px] text-sm font-normal leading-4 text-[#F5F1EB]">
+                      <Button type="button" onClick={() => setAvatar(null)} className="bg-transparent  max-w-24.5 w-full h-10 rounded-[3px] text-sm font-normal leading-4 text-[#F5F1EB]">
                         Remover
                       </Button>
                     </div>
@@ -498,7 +515,7 @@ function PerfilDoColecionadorRouteComponent() {
 
             <div className="w-full max-w-104.25 mb-6">
               <label
-                htmlFor=""
+                htmlFor="profile-current-password"
                 className="text-base  font-normal text-[#F5F1EB] flex  items-center mb-3"
               >
                 Senha atual
@@ -506,8 +523,9 @@ function PerfilDoColecionadorRouteComponent() {
               <div className="relative w-full max-w-104.25 ">
                 <input
                   type="password"
-                  name=""
-                  id=""
+                  name="currentPassword"
+                  id="profile-current-password"
+                  autoComplete="current-password"
                   className="w-full max-w-104.25 h-10 rounded-[3px] border border-[#3F2319]"
                 />
                 <svg
@@ -605,7 +623,7 @@ function PerfilDoColecionadorRouteComponent() {
 
             <div className="w-full max-w-104.25 mb-6">
               <label
-                htmlFor=""
+                htmlFor="profile-new-password"
                 className="text-base  font-normal text-[#F5F1EB] flex  items-center mb-3"
               >
                 Nova senha
@@ -613,8 +631,9 @@ function PerfilDoColecionadorRouteComponent() {
               <div className="relative w-full max-w-104.25 ">
                 <input
                   type="password"
-                  name=""
-                  id=""
+                  name="newPassword"
+                  id="profile-new-password"
+                  autoComplete="new-password"
                   className="w-full max-w-104.25 h-10 rounded-[3px] border border-[#3F2319]"
                 />
                 <svg
@@ -712,7 +731,7 @@ function PerfilDoColecionadorRouteComponent() {
 
             <div className="w-full max-w-104.25 mb-8">
               <label
-                htmlFor=""
+                htmlFor="profile-confirm-password"
                 className="text-base  font-normal text-[#F5F1EB] flex  items-center mb-3"
               >
                 Confirmar nova senha
@@ -720,8 +739,9 @@ function PerfilDoColecionadorRouteComponent() {
               <div className="relative w-full max-w-104.25 ">
                 <input
                   type="password"
-                  name=""
-                  id=""
+                  name="confirmPassword"
+                  id="profile-confirm-password"
+                  autoComplete="new-password"
                   className="w-full max-w-104.25 h-10 rounded-[3px] border border-[#3F2319]"
                 />
                 <svg
@@ -817,7 +837,8 @@ function PerfilDoColecionadorRouteComponent() {
               </div>
             </div>
 
-            <Button className="bg-[#D28A4C] max-w-32.75 w-full h-10 rounded-[3px] text-sm font-bold leading-4 text-[#140D0A]">
+            {feedback && <p role={feedback.includes('sucesso') ? 'status' : 'alert'} className="mb-4 text-[#F5F1EB]">{feedback}</p>}
+            <Button type="submit" disabled={saving || profile.isPending} className="bg-[#D28A4C] max-w-32.75 w-full h-10 rounded-[3px] text-sm font-bold leading-4 text-[#140D0A]">
               Salvar
             </Button>
           </form>

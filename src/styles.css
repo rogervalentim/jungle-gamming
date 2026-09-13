@@ -1,16 +1,23 @@
 @import 'tailwindcss';
 
-* {
-  box-sizing: border-box;
-  font-family: 'Roboto Mono', monospace;
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 700;
+  src: url('@fontsource-variable/roboto-mono/files/roboto-mono-latin-wght-normal.woff2') format('woff2');
 }
 
-html,
-body,
-#app {
-  min-height: 100%;
-}
+@theme {
+  --animate-catalog-shimmer: catalog-shimmer 1.5s linear infinite;
 
-body {
-  background-color: #140d0a;
+  @keyframes catalog-shimmer {
+    from {
+      background-position: 200% 0;
+    }
+
+    to {
+      background-position: -200% 0;
+    }
+  }
 }

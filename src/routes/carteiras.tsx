@@ -1,12 +1,19 @@
 import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { Navbar } from '#/components/navbar'
 import { createFileRoute } from '@tanstack/react-router'
+import { KurioSelect } from '#/components/ui/kurio-select'
+import { requireSession } from '#/lib/require-session'
+import { deleteWallet, saveWallet, useWallets } from '#/api/account'
+import { authErrorMessage, useSession } from '#/api/auth'
+import type { Wallet } from '#/api/account'
 
 export const Route = createFileRoute('/carteiras')({
+  beforeLoad: requireSession,
   component: WalletsRouteComponent,
 })
 
-function WalletFields({ prefix }: { prefix: string }) {
+function WalletFields({ prefix, wallet, email }: { prefix: string; wallet?: Wallet; email?: string }) {
   return (
     <div className="grid grid-cols-1 gap-x-7 gap-y-5 sm:grid-cols-2 sm:gap-y-6">
       <label
@@ -19,7 +26,7 @@ function WalletFields({ prefix }: { prefix: string }) {
           className="block h-10 w-full min-w-0 rounded-[3px] border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C]"
           id={prefix + '-display'}
           name="displayName"
-          required
+          defaultValue={wallet?.label}
         />
       </label>
       <label
@@ -32,6 +39,7 @@ function WalletFields({ prefix }: { prefix: string }) {
           className="block h-10 w-full min-w-0 rounded-[3px] border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C]"
           id={prefix + '-nickname'}
           name="nickname"
+          defaultValue={wallet?.label}
           required
         />
       </label>
@@ -41,40 +49,18 @@ function WalletFields({ prefix }: { prefix: string }) {
       >
         Rede
         <span className="ml-0.5 text-[22px] leading-6 text-[#F0805F]">*</span>
-        <div className="relative">
-          <select
-            className="block h-10 w-full appearance-none min-w-0 rounded-[3px] border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C] has-[option:checked[value='']]:text-[#B39463]"
-            id={prefix + '-network'}
-            name="network"
-            defaultValue=""
-            required
-          >
-            <option value="" disabled>
-              Selecione uma rede
-            </option>
-            <option>Ethereum</option>
-            <option>Polygon</option>
-          </select>
-
-          <svg
-            className="
-                  pointer-events-none
-                  absolute
-                  right-4.5
-                  top-1/2
-                  -translate-y-1/2
-                  w-4
-                  h-4
-                  text-[#B39463]
-                "
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </div>
+        <KurioSelect
+          id={prefix + '-network'}
+          name="network"
+          placeholder="Selecione uma rede"
+          options={[
+            { value: 'ethereum', label: 'Ethereum' },
+            { value: 'polygon', label: 'Polygon' },
+            { value: 'solana', label: 'Solana' },
+          ]}
+          defaultValue={wallet?.network}
+          required
+        />
       </label>
       <label
         className="block text-base font-normal leading-6 text-[#F5F1EB]"
@@ -86,7 +72,6 @@ function WalletFields({ prefix }: { prefix: string }) {
           className="block h-10 w-full min-w-0 rounded-[3px] border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C]"
           id={prefix + '-profile'}
           name="profileName"
-          required
         />
       </label>
       <label
@@ -99,6 +84,7 @@ function WalletFields({ prefix }: { prefix: string }) {
           className="block h-10 w-full min-w-0 rounded-[3px] border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C]"
           id={prefix + '-address'}
           name="address"
+          defaultValue={wallet?.address}
           placeholder="Endereço 0x da carteira"
           required
         />
@@ -117,41 +103,17 @@ function WalletFields({ prefix }: { prefix: string }) {
       >
         Tipo de carteira
         <span className="ml-0.5 text-[22px] leading-6 text-[#F0805F]">*</span>
-        <div className="relative">
-          <select
-            className="block h-10 w-full min-w-0 rounded-[3px] appearance-none border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C] has-[option:checked[value='']]:text-[#B39463]"
-            id={prefix + '-type'}
-            name="walletType"
-            defaultValue=""
-            required
-          >
-            <option value="" disabled>
-              Selecione uma carteira
-            </option>
-            <option>MetaMask</option>
-            <option>Coinbase Wallet</option>
-            <option>Outra</option>
-          </select>
-
-          <svg
-            className="
-                  pointer-events-none
-                  absolute
-                  right-4.5
-                  top-1/2
-                  -translate-y-1/2
-                  w-4
-                  h-4
-                  text-[#B39463]
-                "
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </div>
+        <KurioSelect
+          id={prefix + '-type'}
+          name="walletType"
+          placeholder="Selecione uma carteira"
+          options={[
+            { value: 'MetaMask', label: 'MetaMask' },
+            { value: 'Coinbase Wallet', label: 'Coinbase Wallet' },
+            { value: 'Outra', label: 'Outra' },
+          ]}
+          required
+        />
       </label>
       <label
         className="block text-base font-normal leading-6 text-[#F5F1EB]"
@@ -163,7 +125,6 @@ function WalletFields({ prefix }: { prefix: string }) {
           className="block h-10 w-full min-w-0 rounded-[3px] border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C]"
           id={prefix + '-referral'}
           name="referralCode"
-          required
         />
       </label>
       <label
@@ -177,7 +138,8 @@ function WalletFields({ prefix }: { prefix: string }) {
           type="email"
           id={prefix + '-email'}
           name="email"
-          required
+          defaultValue={email}
+          readOnly
         />
       </label>
       <div>
@@ -188,19 +150,18 @@ function WalletFields({ prefix }: { prefix: string }) {
           Nome ENS{' '}
           <span className="ml-0.5 text-[22px] leading-6 text-[#F0805F]">*</span>
         </label>
-        <div className="flex gap-2 [&_select]:w-20 [&_select]:shrink-0 [&_select]:pl-2.5">
-          <select
-            className="block h-10 w-full min-w-0 rounded-[3px] border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C] has-[option:checked[value='']]:text-[#B39463]"
+        <div className="flex gap-2">
+          <KurioSelect
             aria-label="Sufixo ENS"
             name="ensSuffix"
-          >
-            <option>.eth</option>
-          </select>
+            defaultValue=".eth"
+            options={[{ value: '.eth', label: '.eth' }]}
+            className="w-20! shrink-0 pl-2.5"
+          />
           <input
             className="block h-10 w-full min-w-0 rounded-[3px] border border-[#3F2319] bg-[#140D0A] px-3 text-sm text-[#F5F1EB] placeholder:text-[#B39463] placeholder:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#D28A4C]"
             id={prefix + '-ens'}
             name="ens"
-            required
           />
         </div>
       </div>
@@ -212,6 +173,37 @@ function WalletsRouteComponent() {
   const [secondary, setSecondary] = useState(false)
   const [same, setSame] = useState(false)
   const [message, setMessage] = useState('')
+  const [pending, setPending] = useState(false)
+  const { user } = useSession()
+  const wallets = useWallets()
+  const primaryWallet = wallets.data?.items.find((item) => item.primary)
+  const secondaryWallet = wallets.data?.items.find((item) => !item.primary)
+  const submitWallet = async (
+    event: FormEvent<HTMLFormElement>,
+    primary: boolean,
+    id?: string,
+  ) => {
+    event.preventDefault()
+    const data = new FormData(event.currentTarget)
+    setPending(true)
+    setMessage('')
+    try {
+      await saveWallet(
+        {
+          label: String(data.get('nickname') || data.get('displayName') || '').trim(),
+          address: String(data.get('address') ?? '').trim(),
+          network: String(data.get('network') ?? '') as Wallet['network'],
+          primary,
+        },
+        id,
+      )
+      setMessage('Carteira salva. Ela já está disponível no pagamento.')
+    } catch (error) {
+      setMessage(authErrorMessage(error))
+    } finally {
+      setPending(false)
+    }
+  }
   return (
     <div className="min-h-screen bg-[#140D0A]  **:box-border [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-[3px] [&_button:focus-visible]:outline-[#D28A4C]">
       <Navbar />
@@ -511,16 +503,13 @@ function WalletsRouteComponent() {
             </button>
           </header>
           <form
-            onSubmit={(event) => {
-              event.preventDefault()
-              setMessage(
-                'Dados validados nesta prévia. O salvamento precisa ser conectado ao servidor.',
-              )
-            }}
+            key={primaryWallet?.id ?? 'primary-new'}
+            onSubmit={(event) => void submitWallet(event, true, primaryWallet?.id)}
           >
-            <WalletFields prefix="primary" />
+            <WalletFields prefix="primary" wallet={primaryWallet} email={user?.email} />
             <button
               type="submit"
+              disabled={pending}
               className="mt-8 block h-10 w-32.75 cursor-pointer rounded-[3px] border-0 bg-[#D28A4C] text-sm font-bold text-[#140D0A] hover:bg-[#E89B55]"
             >
               Salvar carteira
@@ -528,6 +517,15 @@ function WalletsRouteComponent() {
             <p className="empty:hidden" role="status">
               {message}
             </p>
+            {primaryWallet && (
+              <button
+                type="button"
+                className="mt-3 text-sm text-[#E89B55] underline"
+                onClick={() => void deleteWallet(primaryWallet.id).catch((error: unknown) => setMessage(authErrorMessage(error)))}
+              >
+                Remover carteira principal
+              </button>
+            )}
           </form>
           <section className="mt-8 [&>header]:flex-wrap min-[901px]:[&>header]:flex-nowrap">
             <header className="flex items-start justify-between gap-3 [&_h1]:m-0 [&_h1]:text-base [&_h1]:leading-5 [&_h1]:font-bold [&_h2]:m-0 [&_h2]:text-base [&_h2]:leading-5 [&_h2]:font-bold">
@@ -561,22 +559,28 @@ function WalletsRouteComponent() {
             </header>
             {same ? (
               <p>A carteira principal será utilizada.</p>
-            ) : secondary ? (
+            ) : secondary || secondaryWallet ? (
               <form
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  setMessage(
-                    'Carteira secundária validada nesta prévia. O salvamento precisa ser conectado ao servidor.',
-                  )
-                }}
+                key={secondaryWallet?.id ?? 'secondary-new'}
+                onSubmit={(event) => void submitWallet(event, false, secondaryWallet?.id)}
               >
-                <WalletFields prefix="secondary" />
+                <WalletFields prefix="secondary" wallet={secondaryWallet} email={user?.email} />
                 <button
+                  disabled={pending}
                   className="mt-8 block h-10 w-32.75 cursor-pointer rounded-[3px] border-0 bg-[#D28A4C] text-sm font-bold text-[#140D0A] hover:bg-[#E89B55]"
                   type="submit"
                 >
                   Salvar carteira
                 </button>
+                {secondaryWallet && (
+                  <button
+                    type="button"
+                    className="ml-4 text-sm text-[#E89B55] underline"
+                    onClick={() => void deleteWallet(secondaryWallet.id).catch((error: unknown) => setMessage(authErrorMessage(error)))}
+                  >
+                    Remover carteira secundária
+                  </button>
+                )}
               </form>
             ) : (
               <p>Você ainda não adicionou uma carteira secundária.</p>

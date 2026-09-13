@@ -19,9 +19,9 @@ export function Footer() {
                 W
               </p>
             </div>
-            <h3 className="text-base font-bold text-[#F5F1EB] mb-3">
+            <h2 className="text-base font-bold text-[#F5F1EB] mb-3">
               Segurança da carteira
-            </h3>
+            </h2>
             <p className="font-normal text-sm text-[#CFB28C]">
               Proteja sua carteira e colecione arte digital <br /> verificada
               com
@@ -75,9 +75,10 @@ export function Footer() {
             </h3>
             <div className="flex mb-4">
               <input
-                type="text"
+                type="email"
+                aria-label="E-mail para avisos de lançamento"
                 placeholder="digite seu e-mail..."
-                className="bg-[#38220F] rounded-l-md  h-10 pl-3 w-full max-w-60 placeholder:text-sm placeholder:text-[#B39463] placeholder:font-normal"
+                className="bg-[#38220F] rounded-l-md h-10 pl-3 w-full max-w-60 text-[#F5F1EB] placeholder:text-sm placeholder:text-[#B39463] placeholder:font-normal"
               />
               <a
                 href="#"

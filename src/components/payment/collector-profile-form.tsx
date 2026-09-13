@@ -1,391 +1,245 @@
+import { Link } from '@tanstack/react-router'
+import { useProfile, useWallets } from '#/api/account'
+
+const inputClass =
+  'w-full max-w-[369.5px] h-10 rounded-[3px] border border-[#3F2319] bg-transparent px-3 text-sm font-normal text-[#F5F1EB] outline-none'
+
+interface DetailProps {
+  label: string
+  value: string
+  type?: string
+}
+
+function Detail({ label, value, type = 'text' }: DetailProps) {
+  return (
+    <div className="w-full max-w-[369.5px]">
+      <label className="flex items-center text-base font-normal text-[#F5F1EB]">
+        {label}
+        <span className="text-[22px] font-normal text-[#F0805F]">*</span>
+      </label>
+
+      <input type={type} className={inputClass} value={value} readOnly />
+    </div>
+  )
+}
+
 export function CollectorProfileForm() {
+  const profile = useProfile()
+  const wallets = useWallets()
+
+  const primary =
+    wallets.data?.items.find((item) => item.primary) ?? wallets.data?.items[0]
+
   return (
     <div className="w-full max-w-190.75">
-      <h1 className="text-base leading-4 font-bold text-[#F5F1EB] mb-3">
+      <h1 className="mb-3 text-base leading-4 font-bold text-[#F5F1EB]">
         Perfil do colecionador
       </h1>
 
       <form className="w-full">
-        <div className="flex gap-6 w-full mb-3">
-          <div className="w-full max-w-[369.5px]">
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
-              Nome de exibição
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
-            </label>
-            <input
-              type="text"
-              name=""
-              id=""
-              className="w-full max-w-[369.5px] h-10 rounded-[3px] border border-[#3F2319]"
-            />
-          </div>
-          <div className="w-full max-w-[369.5px]">
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
-              Nome de usuário{' '}
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
-            </label>
-            <input
-              type="text"
-              name=""
-              id=""
-              className="w-full max-w-[369.5px] h-10 rounded-[3px] border border-[#3F2319]"
-            />
-          </div>
+        {/* Nome de exibição / Nome de usuário */}
+        <div className="mb-3 flex w-full gap-6">
+          <Detail label="Nome de exibição" value={profile.data?.name ?? ''} />
+
+          <Detail
+            label="Nome de usuário"
+            value={profile.data?.username ?? ''}
+          />
         </div>
-        <div className="flex gap-6 w-full mb-3">
-          <div className="w-full max-w-[369.5px]">
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
-              Rede{' '}
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
-            </label>
-            <div className="relative w-full max-w-[369.5px]">
-              <select
-                id="network"
-                name="network"
-                defaultValue=""
-                className="
-                    appearance-none
-                    w-full
-                    h-10
-                    rounded-[3px]
-                    border
-                    border-[#3F2319]
-                    bg-transparent
-                    pl-3
-                    pr-10
-                    text-sm
-                    leading-3.75
-                    font-normal
-                    text-[#B39463]
-                    outline-none
-                    cursor-pointer
-                  "
-              >
-                <option
-                  value=""
-                  disabled
-                  className="bg-[#140D0A] text-[#B39463]"
-                >
-                  Selecione uma rede
-                </option>
 
-                <option
-                  value="ethereum"
-                  className="bg-[#140D0A] text-[#B39463]"
-                >
-                  Ethereum
-                </option>
+        {/* Rede / Nome do perfil */}
+        <div className="mb-3 flex w-full gap-6">
+          <Detail label="Rede" value={primary?.network ?? ''} />
 
-                <option value="polygon" className="bg-[#140D0A] text-[#B39463]">
-                  Polygon
-                </option>
+          <Detail label="Nome do perfil" value={profile.data?.name ?? ''} />
+        </div>
 
-                <option value="solana" className="bg-[#140D0A] text-[#B39463]">
-                  Solana
-                </option>
-              </select>
+        {/* Endereço da carteira */}
+        <div className="mb-3 w-full">
+          <label className="flex items-center text-base font-normal text-[#F5F1EB]">
+            Endereço da carteira
+            <span className="text-[22px] font-normal text-[#F0805F]">*</span>
+          </label>
 
-              <svg
-                className="
-                    pointer-events-none
-                    absolute
-                    right-[35.44px]
-                    top-1/2
-                    -translate-y-1/2
-                    w-4
-                    h-4
-                    text-[#B39463]
-                  "
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="w-full max-w-[369.5px]">
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
-              Nome do perfil
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
-            </label>
+          <div className="flex w-full gap-6">
             <input
               type="text"
-              name=""
-              id=""
-              className="w-full max-w-[369.5px] h-10 rounded-[3px] border border-[#3F2319]"
+              value={primary?.address ?? ''}
+              readOnly
+              placeholder="Endereço 0x da carteira"
+              className="
+                h-10
+                w-full
+                max-w-[369.5px]
+                rounded-[3px]
+                border
+                border-[#3F2319]
+                bg-transparent
+                pl-[22.75px]
+                text-sm
+                text-[#F5F1EB]
+                outline-none
+                placeholder:text-sm
+                placeholder:font-normal
+                placeholder:leading-4
+                placeholder:text-[#B39463]
+              "
+            />
+
+            <input
+              type="text"
+              value={profile.data?.ens ?? ''}
+              readOnly
+              placeholder="ENS ou carteira secundária (opcional)"
+              className="
+                h-10
+                w-full
+                max-w-[369.5px]
+                rounded-[3px]
+                border
+                border-[#3F2319]
+                bg-transparent
+                pl-[22.75px]
+                pr-[34.75px]
+                text-sm
+                text-[#F5F1EB]
+                outline-none
+                placeholder:text-sm
+                placeholder:font-normal
+                placeholder:leading-4
+                placeholder:text-[#B39463]
+              "
             />
           </div>
         </div>
 
-        <div className="w-full mb-3 ">
-          <div>
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
-              Endereço da carteira
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
-            </label>
-            <div className="flex gap-6">
-              <input
-                type="text"
-                name=""
-                id=""
-                placeholder="Endereço 0x da carteira"
-                className="w-full max-w-[369.5px] pl-[22.75px] h-10 rounded-[3px] placeholder:text-sm placeholder:leading-4 placeholder:font-normal placeholder:text-[#B39463] border border-[#3F2319]"
-              />
-              <input
-                type="text"
-                name=""
-                placeholder="ENS ou carteira secundária (opcional)"
-                id=""
-                className="w-full max-w-[369.5px] pl-[22.75px] pr-[34.75px] h-10 rounded-[3px] placeholder:text-sm placeholder:leading-4 placeholder:font-normal placeholder:text-[#B39463] border border-[#3F2319]"
-              />
-            </div>
-          </div>
+        {/* Tipo / Apelido da carteira */}
+        <div className="mb-3 flex w-full gap-6">
+          <Detail label="Tipo de carteira" value={primary?.network ?? ''} />
+
+          <Detail label="Apelido da carteira" value={primary?.label ?? ''} />
         </div>
 
-        <div className="flex gap-6 w-full mb-3">
-          <div className="w-full max-w-[369.5px]">
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
-              Tipo de carteira{' '}
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
-            </label>
-            <div className="relative w-full">
-              <select
-                id="wallet"
-                name="wallet"
-                defaultValue=""
-                className="
-                      appearance-none
-                      w-full
-                      h-10
-                      rounded-[3px]
-                      border
-                      border-[#3F2319]
-                      bg-transparent
-                      pl-3
-                      pr-10
-                      text-sm
-                      leading-3.75
-                      font-normal
-                      text-[#B39463]
-                      outline-none
-                      cursor-pointer
-                    "
-              >
-                <option
-                  value=""
-                  disabled
-                  className="bg-[#140D0A] text-[#B39463]"
-                >
-                  Selecione uma carteira
-                </option>
-
-                <option
-                  value="ethereum"
-                  className="bg-[#140D0A] text-[#B39463]"
-                >
-                  Ethereum
-                </option>
-
-                <option value="polygon" className="bg-[#140D0A] text-[#B39463]">
-                  Polygon
-                </option>
-
-                <option value="solana" className="bg-[#140D0A] text-[#B39463]">
-                  Solana
-                </option>
-              </select>
-
-              <svg
-                className="
-                        pointer-events-none
-                        absolute
-                        right-[35.44px]
-                        top-1/2
-                        -translate-y-1/2
-                        w-4
-                        h-4
-                        text-[#B39463]
-                      "
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </div>
-          </div>
+        {/* Email / ENS */}
+        <div className="mb-3 flex w-full gap-6">
+          <Detail
+            label="E-mail"
+            type="email"
+            value={profile.data?.email ?? ''}
+          />
 
           <div className="w-full max-w-[369.5px]">
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
-              Código de indicação{' '}
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
-            </label>
-            <input
-              type="text"
-              name=""
-              id=""
-              className="w-full max-w-[369.5px] h-10 rounded-[3px] border border-[#3F2319]"
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-6 w-full mb-3">
-          <div className="w-full max-w-[369.5px]">
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
-              E-mail
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
-            </label>
-            <input
-              type="email"
-              name=""
-              id=""
-              className="w-full max-w-[369.5px] h-10 rounded-[3px] border border-[#3F2319]"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor=""
-              className="text-base  font-normal text-[#F5F1EB] flex  items-center"
-            >
+            <label className="flex items-center text-base font-normal text-[#F5F1EB]">
               Nome ENS
-              <span className="text-[22px]  text-[#F0805F] font-normal">*</span>
+              <span className="text-[22px] font-normal text-[#F0805F]">*</span>
             </label>
-            <div className="relative w-full max-w-19.5">
-              <select
-                id="network"
-                name="network"
-                defaultValue=""
+
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={profile.data?.ens ?? ''}
+                readOnly
                 className="
-                      appearance-none
-                      w-full
-                      h-10
-                      rounded-[3px]
-                      border
-                      border-[#3F2319]
-                      bg-transparent
-                      pl-2.5
-                      pr-7
-                      text-sm
-                      leading-3.75
-                      font-normal
-                      text-[#F5F1EB]
-                      outline-none
-                      cursor-pointer
-                    "
-              >
-                <option
-                  value=""
-                  disabled
-                  className="bg-[#140D0A] text-[#F5F1EB]"
-                >
-                  .eth
-                </option>
+                  h-10
+                  w-full
+                  rounded-l-[3px]
+                  border
+                  border-r-0
+                  border-[#3F2319]
+                  bg-transparent
+                  px-3
+                  text-sm
+                  text-[#F5F1EB]
+                  outline-none
+                "
+              />
 
-                <option
-                  value="ethereum"
-                  className="bg-[#140D0A] text-[#F5F1EB]"
-                >
-                  Ethereum
-                </option>
-
-                <option value="polygon" className="bg-[#140D0A] text-[#F5F1EB]">
-                  Polygon
-                </option>
-
-                <option value="solana" className="bg-[#140D0A] text-[#F5F1EB]">
-                  Solana
-                </option>
-              </select>
-
-              <svg
+              <div
                 className="
-                  pointer-events-none
-                  absolute
-                  right-2.5
-                  top-1/2
-                  -translate-y-1/2
-                  w-3
-                  h-3
+                  flex
+                  h-10
+                  w-19.5
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-r-[3px]
+                  border
+                  border-[#3F2319]
+                  bg-transparent
+                  text-sm
+                  font-normal
                   text-[#F5F1EB]
                 "
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
               >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
+                .eth
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Usar outra carteira */}
         <div className="mb-3 flex items-center gap-2">
           <input
             type="radio"
-            name=""
-            id=""
+            id="other-wallet"
             className="
-                appearance-none
-                w-5
-                h-5
-                rounded-full
-                border-2
-                border-[#D28A4C]
-                bg-transparent
-                cursor-pointer
-                checked:bg-[#D28A4C]
-        checked:shadow-[inset_0_0_0_2px_#140D0A]
-
-             "
+              h-5
+              w-5
+              cursor-pointer
+              appearance-none
+              rounded-full
+              border-2
+              border-[#D28A4C]
+              bg-transparent
+              checked:bg-[#D28A4C]
+              checked:shadow-[inset_0_0_0_2px_#140D0A]
+            "
           />
-          <label htmlFor="" className="text-base font-normal text-[#F5F1EB]">
+
+          <label
+            htmlFor="other-wallet"
+            className="text-base font-normal text-[#F5F1EB]"
+          >
             Usar outra carteira?
           </label>
         </div>
 
+        {/* Observação */}
         <div className="w-full max-w-[369.5px]">
-          <label
-            htmlFor=""
-            className="text-base  font-normal mb-3 text-[#F5F1EB] flex  items-center"
-          >
-            Observação do colecionador (opcional){' '}
+          <label className="mb-3 flex items-center text-base font-normal text-[#F5F1EB]">
+            Observação do colecionador (opcional)
           </label>
 
           <textarea
-            name=""
-            id=""
-            className="rounded-[3px] w-full max-w-[369.5px] h-38 border resize-none border-[#3F2319]"
-          ></textarea>
+            readOnly
+            className="
+              h-38
+              w-full
+              max-w-[369.5px]
+              resize-none
+              rounded-[3px]
+              border
+              border-[#3F2319]
+              bg-transparent
+              p-3
+              text-sm
+              text-[#F5F1EB]
+              outline-none
+            "
+          />
         </div>
       </form>
+
+      <p className="mt-4 text-sm text-[#CFB28C]">
+        Precisa atualizar seus dados?{' '}
+        <Link to="/perfil-do-colecionador" className="text-[#E89B55] underline">
+          Editar perfil
+        </Link>
+        {' · '}
+        <Link to="/carteiras" className="text-[#E89B55] underline">
+          Gerenciar carteiras
+        </Link>
+      </p>
     </div>
   )
 }
