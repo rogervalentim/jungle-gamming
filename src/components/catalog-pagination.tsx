@@ -55,7 +55,7 @@ export function CatalogPagination({
   return (
     <Pagination
       aria-label="Paginação do catálogo"
-      className="mt-8 text-[#f5f1eb] flex justify-end max-[600px]:mt-5"
+      className="mt-8 text-[#f5f1eb] flex justify-end max-[600px]:mt-5 mb-2"
     >
       <PaginationContent className="gap-1.5">
         {page > 1 && (
