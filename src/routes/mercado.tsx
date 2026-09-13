@@ -57,7 +57,11 @@ function NftDetails() {
             </a>
           </div>
         ) : query.isPending ? (
-          <div role="status" aria-label="Carregando detalhes do NFT" className="mb-24 min-h-[1400px] text-[#F5F1EB]">
+          <div
+            role="status"
+            aria-label="Carregando detalhes do NFT"
+            className="mb-24 min-h-350 text-[#F5F1EB]"
+          >
             <p className="mb-5">Carregando detalhes do NFT…</p>
             <div className="flex gap-8" aria-hidden="true">
               <div className="h-112.5 w-1/2 animate-catalog-shimmer rounded-xl bg-[linear-gradient(90deg,#241612_25%,#493023_50%,#241612_75%)] bg-size-[200%_100%] motion-reduce:animate-none" />

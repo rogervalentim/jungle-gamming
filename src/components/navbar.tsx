@@ -104,38 +104,30 @@ export function Navbar() {
           </li>
 
           <li>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedSection('Criadores')
-                location.href = '/#colecoes'
-              }}
+            <Link
+              to="/criadores"
+              onClick={() => setSelectedSection(null)}
               className={`${navLinkClass} ${
-                selectedSection === 'Criadores'
+                !selectedSection && pathname === '/criadores'
                   ? activeClass
                   : 'font-normal text-[#F5F1EB]'
               }`}
             >
               Criadores
-            </button>
+            </Link>
           </li>
 
-          <li>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedSection('Aprenda')
-                location.href = '/#blog'
-              }}
-              className={`${navLinkClass} ${
-                selectedSection === 'Aprenda'
-                  ? activeClass
-                  : 'font-normal text-[#F5F1EB]'
-              }`}
-            >
-              Aprenda
-            </button>
-          </li>
+          <Link
+            to="/aprenda"
+            onClick={() => setSelectedSection(null)}
+            className={`${navLinkClass} ${
+              !selectedSection && pathname === '/aprenda'
+                ? activeClass
+                : 'font-normal text-[#F5F1EB]'
+            }`}
+          >
+            Aprenda
+          </Link>
         </ul>
 
         <ul className="flex items-center gap-7 pb-2.5">
@@ -170,9 +162,10 @@ export function Navbar() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  render={<Button
-                    type="button"
-                    className="
+                  render={
+                    <Button
+                      type="button"
+                      className="
                       flex
                       h-8.75
                       min-w-25
@@ -187,13 +180,14 @@ export function Navbar() {
                       text-[#140D0A]
                       hover:bg-[#E89B55]
                     "
-                  >
-                    <img src={LoginIcon} alt="" />
+                    >
+                      <img src={LoginIcon} alt="" />
 
-                    <span>{user.profile.name}</span>
+                      <span>{user.profile.name}</span>
 
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>}
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  }
                 />
 
                 <DropdownMenuContent

@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AprendaRouteImport } from './routes/aprenda'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as CarrinhoDeNftsRouteImport } from './routes/carrinho-de-nfts'
 import { Route as CarteirasRouteImport } from './routes/carteiras'
+import { Route as CriadoresRouteImport } from './routes/criadores'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as PagamentoRouteImport } from './routes/pagamento'
@@ -21,6 +23,11 @@ import { Route as PerfilDoColecionadorRouteImport } from './routes/perfil-do-col
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AprendaRoute = AprendaRouteImport.update({
+  id: '/aprenda',
+  path: '/aprenda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -36,6 +43,11 @@ const CarrinhoDeNftsRoute = CarrinhoDeNftsRouteImport.update({
 const CarteirasRoute = CarteirasRouteImport.update({
   id: '/carteiras',
   path: '/carteiras',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CriadoresRoute = CriadoresRouteImport.update({
+  id: '/criadores',
+  path: '/criadores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -61,9 +73,11 @@ const PerfilDoColecionadorRoute = PerfilDoColecionadorRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/aprenda': typeof AprendaRoute
   '/cadastro': typeof CadastroRoute
   '/carrinho-de-nfts': typeof CarrinhoDeNftsRoute
   '/carteiras': typeof CarteirasRoute
+  '/criadores': typeof CriadoresRoute
   '/login': typeof LoginRoute
   '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
@@ -71,9 +85,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/aprenda': typeof AprendaRoute
   '/cadastro': typeof CadastroRoute
   '/carrinho-de-nfts': typeof CarrinhoDeNftsRoute
   '/carteiras': typeof CarteirasRoute
+  '/criadores': typeof CriadoresRoute
   '/login': typeof LoginRoute
   '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
@@ -82,9 +98,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/aprenda': typeof AprendaRoute
   '/cadastro': typeof CadastroRoute
   '/carrinho-de-nfts': typeof CarrinhoDeNftsRoute
   '/carteiras': typeof CarteirasRoute
+  '/criadores': typeof CriadoresRoute
   '/login': typeof LoginRoute
   '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
@@ -94,9 +112,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/aprenda'
     | '/cadastro'
     | '/carrinho-de-nfts'
     | '/carteiras'
+    | '/criadores'
     | '/login'
     | '/mercado'
     | '/pagamento'
@@ -104,9 +124,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/aprenda'
     | '/cadastro'
     | '/carrinho-de-nfts'
     | '/carteiras'
+    | '/criadores'
     | '/login'
     | '/mercado'
     | '/pagamento'
@@ -114,9 +136,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/aprenda'
     | '/cadastro'
     | '/carrinho-de-nfts'
     | '/carteiras'
+    | '/criadores'
     | '/login'
     | '/mercado'
     | '/pagamento'
@@ -125,9 +149,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AprendaRoute: typeof AprendaRoute
   CadastroRoute: typeof CadastroRoute
   CarrinhoDeNftsRoute: typeof CarrinhoDeNftsRoute
   CarteirasRoute: typeof CarteirasRoute
+  CriadoresRoute: typeof CriadoresRoute
   LoginRoute: typeof LoginRoute
   MercadoRoute: typeof MercadoRoute
   PagamentoRoute: typeof PagamentoRoute
@@ -141,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aprenda': {
+      id: '/aprenda'
+      path: '/aprenda'
+      fullPath: '/aprenda'
+      preLoaderRoute: typeof AprendaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -162,6 +195,13 @@ declare module '@tanstack/react-router' {
       path: '/carteiras'
       fullPath: '/carteiras'
       preLoaderRoute: typeof CarteirasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/criadores': {
+      id: '/criadores'
+      path: '/criadores'
+      fullPath: '/criadores'
+      preLoaderRoute: typeof CriadoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -197,9 +237,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AprendaRoute: AprendaRoute,
   CadastroRoute: CadastroRoute,
   CarrinhoDeNftsRoute: CarrinhoDeNftsRoute,
   CarteirasRoute: CarteirasRoute,
+  CriadoresRoute: CriadoresRoute,
   LoginRoute: LoginRoute,
   MercadoRoute: MercadoRoute,
   PagamentoRoute: PagamentoRoute,

@@ -95,6 +95,8 @@ type Page =
   | 'login'
   | 'cadastro'
   | 'indisponivel'
+  | 'criadores'
+  | 'aprenda'
 const categories: { key: Category; label: string }[] = [
   { key: 'all', label: 'Todos os NFTs' },
   { key: 'new', label: 'Novos lançamentos' },
@@ -111,6 +113,10 @@ function pageForPath(pathname: string): Page {
       return 'carrinho'
     case '/pagamento':
       return 'pagamento'
+    case '/criadores':
+      return 'criadores'
+    case '/aprenda':
+      return 'aprenda'
     case '/login':
       return 'login'
     case '/cadastro':
@@ -176,29 +182,38 @@ export function MobileFlow() {
   const [showPassword, setShowPassword] = useState(false)
   const [authMessage, setAuthMessage] = useState('')
   const [authPending, setAuthPending] = useState(false)
-  const [orderId, setOrderId] = useState<string | null>(
-    () => currentUrl.searchParams.get('order'),
+  const [orderId, setOrderId] = useState<string | null>(() =>
+    currentUrl.searchParams.get('order'),
   )
   const [orderPending, setOrderPending] = useState(false)
   const [orderError, setOrderError] = useState('')
   const idempotencyKey = useRef(crypto.randomUUID())
-  const coupon = page === 'pagamento'
-    ? currentUrl.searchParams.get('coupon') ?? ''
-    : appliedCoupon
+  const coupon =
+    page === 'pagamento'
+      ? (currentUrl.searchParams.get('coupon') ?? '')
+      : appliedCoupon
   const quote = useQuote(coupon)
   const order = useOrder(orderId)
   const realtimeNotice = useRealtimeNotice()
   useEffect(() => {
     if (page !== 'pagamento' || orderId) return
-    void recoverOrderAttempt().then((restored) => {
-      if (!restored) return
-      const url = new URL(window.location.href)
-      url.searchParams.set('order', restored.id)
-      window.history.replaceState(window.history.state, '', url)
-      setOrderId(restored.id)
-    }).catch(() => { /* retry remains available when the network returns */ })
+    void recoverOrderAttempt()
+      .then((restored) => {
+        if (!restored) return
+        const url = new URL(window.location.href)
+        url.searchParams.set('order', restored.id)
+        window.history.replaceState(window.history.state, '', url)
+        setOrderId(restored.id)
+      })
+      .catch(() => {
+        /* retry remains available when the network returns */
+      })
   }, [page, orderId])
-  const selectedWallet = wallet || wallets.data?.items.find((item) => item.primary)?.id || wallets.data?.items[0]?.id || ''
+  const selectedWallet =
+    wallet ||
+    wallets.data?.items.find((item) => item.primary)?.id ||
+    wallets.data?.items[0]?.id ||
+    ''
   const updateCatalog = (patch: Partial<CatalogSearch>, resetPage = true) => {
     void navigate({
       to: '/',
@@ -236,6 +251,8 @@ export function MobileFlow() {
       inicio: '/',
       detalhes: '/mercado',
       carrinho: '/carrinho-de-nfts',
+      criadores: '/criadores',
+      aprenda: '/aprenda',
       pagamento: '/pagamento',
       login: '/login',
       cadastro: '/cadastro',
@@ -474,7 +491,11 @@ export function MobileFlow() {
                 aria-label="Carregando NFTs"
               >
                 {Array.from({ length: 8 }, (_, i) => (
-                  <div key={i} aria-hidden="true" className="m-product-skeleton min-w-0">
+                  <div
+                    key={i}
+                    aria-hidden="true"
+                    className="m-product-skeleton min-w-0"
+                  >
                     <span
                       className={`${shimmer} catalog-skeleton mb-2.5 block aspect-square w-full rounded-[20px]`}
                     />
@@ -661,12 +682,12 @@ export function MobileFlow() {
               >
                 <ArrowLeft size={20} />
               </button>
-            <MobileFavoriteButton
-              id={selectedNft.id}
-              name={selectedNft.name}
-              className={roundButton}
-              size={19}
-            />
+              <MobileFavoriteButton
+                id={selectedNft.id}
+                name={selectedNft.name}
+                className={roundButton}
+                size={19}
+              />
             </div>
             <img
               className="mt-2 h-[355px] w-full rounded-3xl object-cover"
@@ -754,7 +775,9 @@ export function MobileFlow() {
                       setCartMessage('')
                       void addToCart(selectedNft.id, edition.id, safeQuantity)
                         .then(() => go('pagamento'))
-                        .catch((error: unknown) => setCartMessage(authErrorMessage(error)))
+                        .catch((error: unknown) =>
+                          setCartMessage(authErrorMessage(error)),
+                        )
                     }}
                   >
                     Comprar NFT
@@ -768,13 +791,19 @@ export function MobileFlow() {
                       setCartMessage('')
                       void addToCart(selectedNft.id, edition.id, safeQuantity)
                         .then(() => go('carrinho'))
-                        .catch((error: unknown) => setCartMessage(authErrorMessage(error)))
+                        .catch((error: unknown) =>
+                          setCartMessage(authErrorMessage(error)),
+                        )
                     }}
                   >
                     <ShoppingCart size={20} fill="currentColor" />
                   </button>
                 </div>
-                {cartMessage && <p role="alert" className={catalogMessage}>{cartMessage}</p>}
+                {cartMessage && (
+                  <p role="alert" className={catalogMessage}>
+                    {cartMessage}
+                  </p>
+                )}
                 {edition.availableQuantity === 0 && (
                   <p role="status" className={catalogMessage}>
                     Esta edição está esgotada.
@@ -815,7 +844,11 @@ export function MobileFlow() {
               Carrinho de NFTs
             </h1>
           </header>
-          {realtimeNotice && <p role="status" className={catalogMessage}>{realtimeNotice}</p>}
+          {realtimeNotice && (
+            <p role="status" className={catalogMessage}>
+              {realtimeNotice}
+            </p>
+          )}
           <div className="grid gap-5">
             {cartItems(cart).map((nft) => (
               <article
@@ -840,7 +873,11 @@ export function MobileFlow() {
                   <button
                     className="grid size-6 shrink-0 place-items-center rounded-full border border-[#4b3022] bg-[#342218] p-0 leading-none text-[#eee]"
                     aria-label={`Diminuir ${nft.name}`}
-                    onClick={() => void changeQuantity(nft, -1).catch((error: unknown) => setCartMessage(authErrorMessage(error)))}
+                    onClick={() =>
+                      void changeQuantity(nft, -1).catch((error: unknown) =>
+                        setCartMessage(authErrorMessage(error)),
+                      )
+                    }
                   >
                     <Minus size={15} />
                   </button>
@@ -849,7 +886,11 @@ export function MobileFlow() {
                     className="grid size-6 shrink-0 place-items-center rounded-full border border-[#4b3022] bg-[#342218] p-0 leading-none text-[#eee]"
                     aria-label={`Aumentar ${nft.name}`}
                     disabled={nft.quantity >= nft.availableQuantity}
-                    onClick={() => void changeQuantity(nft, 1).catch((error: unknown) => setCartMessage(authErrorMessage(error)))}
+                    onClick={() =>
+                      void changeQuantity(nft, 1).catch((error: unknown) =>
+                        setCartMessage(authErrorMessage(error)),
+                      )
+                    }
                   >
                     <Plus size={16} />
                   </button>
@@ -881,7 +922,9 @@ export function MobileFlow() {
               </button>
             </div>
             {(promoMessage || quote.isError || cartMessage) && (
-              <small role="alert" className="text-[#e89b55]">{cartMessage || promoMessage || authErrorMessage(quote.error)}</small>
+              <small role="alert" className="text-[#e89b55]">
+                {cartMessage || promoMessage || authErrorMessage(quote.error)}
+              </small>
             )}
             <div className={cartRow}>
               <span>Subtotal</span>
@@ -893,21 +936,26 @@ export function MobileFlow() {
             </div>
             <div className={cartRow}>
               <span>Taxa de rede</span>
-              <span>{quote.data?.networkFee ?? (cartCount ? '0.016' : '0')} ETH</span>
+              <span>
+                {quote.data?.networkFee ?? (cartCount ? '0.016' : '0')} ETH
+              </span>
             </div>
             <small className="-mt-[14px] block text-right text-[11px]">
               Taxa estimada
             </small>
             <div className="mt-5 mb-7 flex justify-between text-sm">
               <b>Total</b>
-              <strong className="text-lg text-[#e89b55]">
-                {total} ETH
-              </strong>
+              <strong className="text-lg text-[#e89b55]">{total} ETH</strong>
             </div>
             {button(
               'Conectar e finalizar',
               () => go('pagamento'),
-              cartCount && !quote.isError && !quote.isPending && !quote.isFetching ? '!rounded-[40px]' : '!rounded-[40px] disabled',
+              cartCount &&
+                !quote.isError &&
+                !quote.isPending &&
+                !quote.isFetching
+                ? '!rounded-[40px]'
+                : '!rounded-[40px] disabled',
             )}
           </div>
         </>
@@ -922,10 +970,22 @@ export function MobileFlow() {
               Pagamento com carteira
             </h1>
           </header>
-          {realtimeNotice && <p role="status" className={catalogMessage}>{realtimeNotice}</p>}
+          {realtimeNotice && (
+            <p role="status" className={catalogMessage}>
+              {realtimeNotice}
+            </p>
+          )}
           {orderId ? (
             <div className="mt-[120px] text-center">
-              <h2>{order.data?.status === 'declined' ? 'Pagamento recusado' : order.data?.status === 'confirmed' ? 'Pedido confirmado' : order.data?.status === 'pending' ? 'Pedido pendente' : 'Carregando pedido'}</h2>
+              <h2>
+                {order.data?.status === 'declined'
+                  ? 'Pagamento recusado'
+                  : order.data?.status === 'confirmed'
+                    ? 'Pedido confirmado'
+                    : order.data?.status === 'pending'
+                      ? 'Pedido pendente'
+                      : 'Carregando pedido'}
+              </h2>
               <p className="my-5 mb-[30px] text-[#cbb090]">
                 {order.isError
                   ? 'Não foi possível recuperar o pedido. Atualize a página para tentar novamente.'
@@ -935,7 +995,9 @@ export function MobileFlow() {
               </p>
               {order.data && (
                 <div className="mb-6 text-left text-sm text-[#cbb090]">
-                  <p className="mb-2">Referência simulada: SIM-{order.data.id.slice(0, 8)}</p>
+                  <p className="mb-2">
+                    Referência simulada: SIM-{order.data.id.slice(0, 8)}
+                  </p>
                   {order.data.items.map((item) => (
                     <p key={`${item.nftId}:${item.editionId}`} className="mb-2">
                       {item.name} · {item.quantity} × {item.price} ETH
@@ -944,7 +1006,9 @@ export function MobileFlow() {
                   <p>Subtotal: {order.data.subtotal} ETH</p>
                   <p>Desconto: {order.data.discount} ETH</p>
                   <p>Taxa de rede: {order.data.networkFee} ETH</p>
-                  <p className="font-bold text-[#e89b55]">Total: {order.data.total} ETH</p>
+                  <p className="font-bold text-[#e89b55]">
+                    Total: {order.data.total} ETH
+                  </p>
                 </div>
               )}
               {button('Voltar ao início', () => go('inicio'))}
@@ -957,7 +1021,9 @@ export function MobileFlow() {
                   className="border-0 bg-transparent font-bold text-[#e89b55]"
                   onClick={() => {
                     const options = wallets.data?.items ?? []
-                    const index = options.findIndex((item) => item.id === selectedWallet)
+                    const index = options.findIndex(
+                      (item) => item.id === selectedWallet,
+                    )
                     setWallet(options[(index + 1) % options.length]?.id ?? '')
                   }}
                 >
@@ -985,7 +1051,11 @@ export function MobileFlow() {
                 </button>
               ))}
               {!wallets.data?.items.length && (
-                <button type="button" className="mb-5 text-sm text-[#E89B55] underline" onClick={() => window.location.assign('/carteiras')}>
+                <button
+                  type="button"
+                  className="mb-5 text-sm text-[#E89B55] underline"
+                  onClick={() => window.location.assign('/carteiras')}
+                >
                   Cadastre uma carteira para concluir
                 </button>
               )}
@@ -1016,13 +1086,21 @@ export function MobileFlow() {
               <button
                 type="button"
                 className={`${primaryButton} fixed bottom-[34px] left-[7%] !w-[86%] !rounded-[40px] disabled:opacity-50`}
-                disabled={!quote.data || quote.isFetching || !selectedWallet || !provider || orderPending}
+                disabled={
+                  !quote.data ||
+                  quote.isFetching ||
+                  !selectedWallet ||
+                  !provider ||
+                  orderPending
+                }
                 onClick={submitOrder}
               >
                 {orderPending ? 'Confirmando…' : 'Confirmar compra'}
               </button>
               {(orderError || quote.isError) && (
-                <p role="alert" className="mt-4 text-sm text-[#E89B55]">{orderError || 'A cotação mudou. Volte ao carrinho.'}</p>
+                <p role="alert" className="mt-4 text-sm text-[#E89B55]">
+                  {orderError || 'A cotação mudou. Volte ao carrinho.'}
+                </p>
               )}
             </>
           )}
@@ -1248,6 +1326,176 @@ export function MobileFlow() {
             Voltar ao início
           </button>
         </div>
+      )}
+
+      {page === 'criadores' && (
+        <>
+          <header className="mb-6 flex items-center gap-4">
+            <button
+              type="button"
+              className={roundButton}
+              aria-label="Voltar"
+              onClick={() => go('inicio')}
+            >
+              <ArrowLeft size={20} />
+            </button>
+
+            <h1 className="text-xl font-extrabold">Criadores</h1>
+          </header>
+
+          <main className="pb-[110px]">
+            <Collection />
+          </main>
+
+          <nav
+            className="fixed bottom-0 left-0 z-10 h-[calc(96px+env(safe-area-inset-bottom))] w-full rounded-t-[30px] bg-[#2a1d17] before:absolute before:-top-[42px] before:left-1/2 before:size-[90px] before:-translate-x-1/2 before:rounded-full before:bg-[#1b130e] before:content-['']"
+            aria-label="Navegação principal"
+          >
+            <button
+              type="button"
+              className={`${navButton} left-[10%]`}
+              aria-label="Início"
+              onClick={() => go('inicio')}
+            >
+              <Home fill="currentColor" />
+            </button>
+
+            <button
+              type="button"
+              className={`${navButton} left-[28%]`}
+              aria-label="Favoritos"
+              onClick={() => {
+                if (!user) {
+                  go('login')
+                } else {
+                  setShowFavorites(!showFavorites)
+                }
+              }}
+            >
+              <Heart fill="currentColor" />
+            </button>
+
+            <button
+              type="button"
+              className="absolute -top-8 left-1/2 z-[1] grid size-16 -translate-x-1/2 shrink-0 place-items-center rounded-full border-0 bg-[#b97a45] p-0 leading-none text-white [&_svg]:size-7 [&_svg]:stroke-[1.5]"
+              aria-label="Criadores"
+              onClick={() => go('criadores')}
+            >
+              <ScanLine />
+            </button>
+
+            <button
+              type="button"
+              className={`${navButton} left-[72%]`}
+              aria-label={`Carrinho, ${cartCount} ${
+                cartCount === 1 ? 'produto' : 'produtos'
+              }`}
+              onClick={() => go('carrinho')}
+            >
+              <ShoppingCart fill="currentColor" />
+
+              {cartCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-[7px] right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d28a4c] px-0.5 text-[10px] leading-none font-bold text-[#140d0a]"
+                >
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              className={`${navButton} left-[87%]`}
+              aria-label={user ? `Conta de ${user.profile.name}` : 'Entrar'}
+              onClick={() => go('login')}
+            >
+              <UserRound fill="currentColor" />
+            </button>
+          </nav>
+        </>
+      )}
+
+      {page === 'aprenda' && (
+        <>
+          <header className="mb-6 flex items-center gap-4">
+            <button
+              type="button"
+              className={roundButton}
+              aria-label="Voltar"
+              onClick={() => go('inicio')}
+            >
+              <ArrowLeft size={20} />
+            </button>
+
+            <h1 className="text-xl font-extrabold">Aprenda</h1>
+          </header>
+
+          <main className="pb-[110px]">
+            <Blog />
+          </main>
+
+          <nav
+            className="fixed bottom-0 left-0 z-10 h-[calc(96px+env(safe-area-inset-bottom))] w-full rounded-t-[30px] bg-[#2a1d17] before:absolute before:-top-[42px] before:left-1/2 before:size-[90px] before:-translate-x-1/2 before:rounded-full before:bg-[#1b130e] before:content-['']"
+            aria-label="Navegação principal"
+          >
+            <button
+              type="button"
+              className={`${navButton} left-[10%]`}
+              aria-label="Início"
+              onClick={() => go('inicio')}
+            >
+              <Home fill="currentColor" />
+            </button>
+
+            <button
+              type="button"
+              className={`${navButton} left-[28%]`}
+              aria-label="Criadores"
+              onClick={() => go('criadores')}
+            >
+              <Heart fill="currentColor" />
+            </button>
+
+            <button
+              type="button"
+              className="absolute -top-8 left-1/2 z-[1] grid size-16 -translate-x-1/2 shrink-0 place-items-center rounded-full border-0 bg-[#b97a45] p-0 leading-none text-white [&_svg]:size-7 [&_svg]:stroke-[1.5]"
+              aria-label="Aprenda"
+              onClick={() => go('aprenda')}
+            >
+              <ScanLine />
+            </button>
+
+            <button
+              type="button"
+              className={`${navButton} left-[72%]`}
+              aria-label={`Carrinho, ${cartCount} ${
+                cartCount === 1 ? 'produto' : 'produtos'
+              }`}
+              onClick={() => go('carrinho')}
+            >
+              <ShoppingCart fill="currentColor" />
+
+              {cartCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-[7px] right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d28a4c] px-0.5 text-[10px] leading-none font-bold text-[#140d0a]"
+                >
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              className={`${navButton} left-[87%]`}
+              aria-label={user ? `Conta de ${user.profile.name}` : 'Entrar'}
+              onClick={() => go('login')}
+            >
+              <UserRound fill="currentColor" />
+            </button>
+          </nav>
+        </>
       )}
     </div>
   )
